@@ -55,14 +55,28 @@ class AdminModel {
 
     // Статистика для панели администратора
     public function getStats(): array {
-        $totalCourses = $this->db->query("SELECT COUNT(*) FROM courses")->fetchColumn();
-        $totalApps = $this->db->query("SELECT COUNT(*) FROM applications")->fetchColumn();
-        $newApps = $this->db->query("SELECT COUNT(*) FROM applications WHERE status = 'new'")->fetchColumn();
+        $totalCourses = (int)$this->db->query("SELECT COUNT(*) FROM courses")->fetchColumn();
+        $totalApps = (int)$this->db->query("SELECT COUNT(*) FROM applications")->fetchColumn();
+        $newApps = (int)$this->db->query("SELECT COUNT(*) FROM applications WHERE status = 'new'")->fetchColumn();
+        $inProgressApps = (int)$this->db->query("SELECT COUNT(*) FROM applications WHERE status = 'in_progress'")->fetchColumn();
+        $approvedApps = (int)$this->db->query("SELECT COUNT(*) FROM applications WHERE status = 'approved'")->fetchColumn();
+        $rejectedApps = (int)$this->db->query("SELECT COUNT(*) FROM applications WHERE status = 'rejected'")->fetchColumn();
+        
+        $totalRevenue = (float)$this->db->query("
+            SELECT COALESCE(SUM(c.price), 0) 
+            FROM applications a 
+            JOIN courses c ON a.course_id = c.id 
+            WHERE a.status = 'approved'
+        ")->fetchColumn();
 
         return [
             'total_courses' => $totalCourses,
             'total_applications' => $totalApps,
-            'new_applications' => $newApps
+            'new_applications' => $newApps,
+            'in_progress_applications' => $inProgressApps,
+            'approved_applications' => $approvedApps,
+            'rejected_applications' => $rejectedApps,
+            'total_revenue' => $totalRevenue
         ];
     }
 }

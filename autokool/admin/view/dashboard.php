@@ -7,22 +7,71 @@
         <a href="#new-course" class="btn btn-primary" onclick="toggleAddCourseForm()">+ Lisa uus kursus</a>
     </div>
 
-    <!-- Статистические карточки -->
+    <!-- Статистический блок -->
     <?php if (isset($stats)): ?>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
-            <div class="admin-card" style="margin-bottom: 0; text-align: center; padding: 20px;">
-                <h3 style="font-size: 2rem; color: var(--primary); margin-bottom: 5px;"><?= e((string)$stats['new_applications']) ?></h3>
-                <p style="color: var(--muted); font-size: 0.9rem;">Uued avaldused (ootel)</p>
+        <?php 
+            $totalApps = max(1, (int)$stats['total_applications']);
+            $approvedPct = round(((int)$stats['approved_applications'] / $totalApps) * 100);
+            $inProgressPct = round(((int)$stats['in_progress_applications'] / $totalApps) * 100);
+            $newPct = round(((int)$stats['new_applications'] / $totalApps) * 100);
+            $rejectedPct = round(((int)$stats['rejected_applications'] / $totalApps) * 100);
+        ?>
+        <section class="admin-card" style="background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border-top: 4px solid var(--primary); margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                    📊 Autokooli Statistika ja Analüütika
+                </h2>
+                <span style="font-size: 0.85rem; color: var(--muted); background: #e2e8f0; padding: 4px 10px; border-radius: 20px;">
+                    Reaalajas andmed
+                </span>
             </div>
-            <div class="admin-card" style="margin-bottom: 0; text-align: center; padding: 20px;">
-                <h3 style="font-size: 2rem; color: var(--slate); margin-bottom: 5px;"><?= e((string)$stats['total_applications']) ?></h3>
-                <p style="color: var(--muted); font-size: 0.9rem;">Avaldusi kokku</p>
+
+            <!-- KPI карточки -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 18px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8rem; margin-bottom: 5px;">⏳</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: #0284c7; line-height: 1;"><?= (int)$stats['new_applications'] ?></div>
+                    <div style="color: var(--muted); font-size: 0.85rem; margin-top: 6px; font-weight: 500;">Uued avaldused (ootel)</div>
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 18px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8rem; margin-bottom: 5px;">👥</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: var(--slate); line-height: 1;"><?= (int)$stats['total_applications'] ?></div>
+                    <div style="color: var(--muted); font-size: 0.85rem; margin-top: 6px; font-weight: 500;">Avaldusi kokku</div>
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 18px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8rem; margin-bottom: 5px;">🚗</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: #16a34a; line-height: 1;"><?= (int)$stats['total_courses'] ?></div>
+                    <div style="color: var(--muted); font-size: 0.85rem; margin-top: 6px; font-weight: 500;">Aktiivseid kursusi</div>
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 18px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8rem; margin-bottom: 5px;">💰</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: #d97706; line-height: 1;"><?= number_format((float)$stats['total_revenue'], 2) ?> €</div>
+                    <div style="color: var(--muted); font-size: 0.85rem; margin-top: 6px; font-weight: 500;">Kinnitatud tulu</div>
+                </div>
             </div>
-            <div class="admin-card" style="margin-bottom: 0; text-align: center; padding: 20px;">
-                <h3 style="font-size: 2rem; color: var(--slate); margin-bottom: 5px;"><?= e((string)$stats['total_courses']) ?></h3>
-                <p style="color: var(--muted); font-size: 0.9rem;">Aktiivseid kursusi</p>
+
+            <!-- Аналитика статусов с прогресс-баром -->
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">
+                    <span>Avalduste jaotus staatuste järgi:</span>
+                    <span>
+                        <span style="color: #0284c7;">Uus: <?= (int)$stats['new_applications'] ?></span> | 
+                        <span style="color: #d97706;">Töös: <?= (int)$stats['in_progress_applications'] ?></span> | 
+                        <span style="color: #16a34a;">Kinnitatud: <?= (int)$stats['approved_applications'] ?></span> | 
+                        <span style="color: #dc2626;">Tagasi lükatud: <?= (int)$stats['rejected_applications'] ?></span>
+                    </span>
+                </div>
+                <div style="height: 12px; border-radius: 6px; background: #e2e8f0; display: flex; overflow: hidden;">
+                    <div style="width: <?= $newPct ?>%; background: #38bdf8;" title="Uus: <?= $newPct ?>%"></div>
+                    <div style="width: <?= $inProgressPct ?>%; background: #fbbf24;" title="Töös: <?= $inProgressPct ?>%"></div>
+                    <div style="width: <?= $approvedPct ?>%; background: #4ade80;" title="Kinnitatud: <?= $approvedPct ?>%"></div>
+                    <div style="width: <?= $rejectedPct ?>%; background: #f87171;" title="Tagasi lükatud: <?= $rejectedPct ?>%"></div>
+                </div>
             </div>
-        </div>
+        </section>
     <?php endif; ?>
 
     <?php if (!empty($flash_msg)): ?>

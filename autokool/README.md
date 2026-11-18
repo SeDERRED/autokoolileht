@@ -1,72 +1,84 @@
-# Autokool - Веб-сайт автошколы на PHP (Архитектура MVC)
+# Autokool - Veebipõhine infosüsteem (PHP MVC & Docker)
 
-Проект построен по архитектуре **Model-View-Controller (MVC)** с единой точкой входа (`index.php`) и чистым разделением логики.
+Koolitöö projekt aines **«Tarkvara arendusmeetodid»**.
 
-## Структура проекта
+Projekt katab tarkvara arenduse elutsükli (SDLC): lähteülesannete analüüsi, arhitektuurse disaini (MVC), realiseerimise PHP-s, testimise ja konteineriseeritud juurutamise (Docker).
+
+Põhjalik analüüs ja spetsifikatsioon asub failis **[DOKUMENTATSIOON.md](DOKUMENTATSIOON.md)**.
+
+---
+
+## 📁 Projekti struktuur
+
+Struktuur järgib rangelt ettenähtud näidist:
+
 ```text
 autokool/
-├── admin/               # Модуль административной панели
-├── controller/          # Контроллеры (HomeController, CourseController, AuthController, AdminController)
-├── images/ (imeges/)    # Изображения и графика
-├── inc/                 # Ядро: db.php (PDO), functions.php (хелперы)
-├── js/                  # main.js (модальные окна, AJAX, клиентская логика)
-├── model/               # Модели данных (CourseModel, UserModel, ApplicationModel)
-├── route/               # routing.php (маршрутизатор запросов)
-├── view/                # HTML-шаблоны (header, footer, home, courses, login, admin_dashboard)
-├── .dockerignore        # Исключения для Docker
-├── .htaccess            # ЧПУ и перенаправление запросов на index.php
-├── Dockerfile           # Конфигурация контейнера PHP 8.2 + Apache
-├── docker-compose.yml   # Оркестрация (PHP + MySQL 8.0 + phpMyAdmin)
-├── index.php            # Главная точка входа (Front Controller)
-├── style.css            # Таблица стилей
-├── database.sql         # SQL-дамп для импорта в MySQL
-└── README.md            # Инструкция к проекту
+├── admin/                         # Administraatori eraldiseisev MVC moodul
+│   ├── controller/AdminController.php
+│   ├── model/AdminModel.php
+│   ├── view/ (dashboard.php, header.php, footer.php, login.php)
+│   └── index.php
+├── controller/                    # Peamised kontrollerid
+│   ├── HomeController.php         # Avalehe loogika
+│   ├── CourseController.php       # Kursuste kuvamine ja registreerumine
+│   ├── AuthController.php         # Sisselogimine ja registreerimine
+│   └── UserController.php         # Õpilase isiklik kabinet (profiil)
+├── images/ (imeges/)              # Staatilised graafikafailid
+├── inc/                           # Tuum ja konfiguratsioon
+│   ├── db.php                     # Andmebaasi ühendus (PDO MySQL & SQLite)
+│   └── functions.php              # Globaalsed abifunktsioonid
+├── js/
+│   └── main.js                    # Kliendipoolsed skriptid (modaalaknad, sündmused)
+├── model/                         # Andmemudelid
+│   ├── CourseModel.php            # Kursuste CRUD
+│   ├── UserModel.php              # Kasutajate haldus ja paroolide verifitseerimine
+│   └── ApplicationModel.php       # Kursuste avalduste haldus
+├── route/
+│   └── routing.php                # Keskne URL-ruuter (GET ja POST)
+├── view/                          # Avalikud vaated (HTML-mallid)
+│   ├── header.php, footer.php
+│   ├── home.php, courses.php
+│   ├── profile.php (Minu konto)
+│   ├── login.php, register.php
+│   └── 404.php
+├── .dockerignore                  # Dockeri ignoreerimisfail
+├── .htaccess                      # Apache ümbersuunamine (Front Controller)
+├── Dockerfile                     # PHP 8.2 + Apache konteineri definitsioon
+├── docker-compose.yml             # Süsteemi orkestreerimine (PHP + MySQL 8 + phpMyAdmin)
+├── index.php                      # Peamine sisenemispunkt (Front Controller)
+├── style.css                      # Kogu rakenduse stiilileht (Responsive)
+├── database.sql                   # MySQL andmebaasi skeem ja algandmed
+├── DOKUMENTATSIOON.md             # Täielik projektidokumentatsioon ja testimisaruanne
+└── README.md                      # Projekti lühitutvustus
 ```
 
 ---
 
-## Запуск через Docker (Рекомендуемый способ)
+## 🚀 Kiirkäivitus (Docker Compose)
 
-В проект добавлены `Dockerfile` и `docker-compose.yml`, которые автоматически поднимают:
-1. **PHP 8.2 + Apache** с включенным `mod_rewrite` и поддержкой `.htaccess`.
-2. **MySQL 8.0** с автоматическим созданием таблиц из `database.sql`.
-3. **phpMyAdmin** для удобного управления базой данных через веб-интерфейс.
-
-### Команда для запуска:
+### 1. Käivitamine
+Veendu, et Docker Desktop töötab, ja käivita projekti kaustas:
 ```bash
 docker compose up -d --build
 ```
 
-### Доступные адреса:
-- **Сайт автошколы:** [http://localhost:8080](http://localhost:8080)
-- **phpMyAdmin (БД):** [http://localhost:8081](http://localhost:8081)
-  - Сервер: `db`
-  - Пользователь: `autokool_user`
-  - Пароль: `autokool_pass`
-
-### Остановка контейнеров:
-```bash
-docker compose down
-```
-
-> **Горячая перезагрузка (Live Reload):** Папка проекта примонтирована внутрь контейнера через том (`volume`). Любые изменения в PHP, CSS или JS файлах сразу отображаются в браузере без необходимости пересобирать контейнер!
+### 2. Süsteemi aadressid
+- **Veebileht:** [http://localhost:8080](http://localhost:8080)
+- **Juhtpaneel:** [http://localhost:8080/login/admin](http://localhost:8080/login/admin)
+- **phpMyAdmin (Andmebaas):** [http://localhost:8081](http://localhost:8081)
 
 ---
 
-## Запуск без Docker
+## 🔑 Testkontod
 
-### Вариант 1: Встроенный сервер PHP
-```bash
-php -S localhost:8000
-```
-Сайт доступен на `http://localhost:8000` (работает на встроенной SQLite).
-
-### Вариант 2: OpenServer / XAMPP
-Скопируйте папку в директорию веб-сервера (`OSPanel/domains/` или `xampp/htdocs/`).
+| Roll | Kasutajanimi | Parool | Õigused |
+| :--- | :--- | :--- | :--- |
+| **Administraator** | `admin` | `admin123` | Juurdepääs juhtpaneelile, kursuste ja avalduste täielik haldamine |
+| **Õpilane (Tavakasutaja)** | `user` | `user123` | Isiklik kabinet (`Minu konto`), oma avalduste jälgimine |
 
 ---
 
-## Данные для входа в панель администратора
-- **URL входа:** `/login` (или кнопка «Вход» в шапке)
-- **Логин:** `admin`
-- **Пароль:** `admin123`
+## 🧪 Testimine
+
+Kõik funktsionaalsed nõuded on testitud. Testilugude raport (TC-01 kuni TC-08) on toodud failis **[DOKUMENTATSIOON.md](DOKUMENTATSIOON.md)**.
