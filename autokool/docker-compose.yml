@@ -1,0 +1,61 @@
+services:
+  # Веб-приложение (PHP 8.2 + Apache)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autokool_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      # Монтируем локальную папку, чтобы любые изменения в коде сразу отображались в браузере
+      - ./:/var/www/html
+    environment:
+      - DB_DRIVER=mysql
+      - DB_HOST=db
+      - DB_NAME=autokool
+      - DB_USER=autokool_user
+      - DB_PASS=autokool_pass
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # База данных MySQL 8
+  db:
+    image: mysql:8.0
+    container_name: autokool_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: autokool
+      MYSQL_USER: autokool_user
+      MYSQL_PASSWORD: autokool_pass
+    volumes:
+      - db_data:/var/lib/mysql
+      # Автоматический импорт таблиц и базовых данных при первом запуске
+      - ./database.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Панель управления базой данных (phpMyAdmin)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: autokool_pma
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: autokool_user
+      PMA_PASSWORD: autokool_pass
+    depends_on:
+      - db
+
+volumes:
+  db_data:
